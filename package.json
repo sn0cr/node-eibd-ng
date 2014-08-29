@@ -6,11 +6,17 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "author": "Sn0cr",
+  "author": "Sn0cr <709679 at gmail.com>",
   "license": "MIT",
   "dependencies": {
     "buffertools": "^2.1.2",
-    "coffee-script": "^1.7.1",
+    "coffee-script": "^1.7.1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/sn0cr/node-eibd-ng"
+},
+  "devDependencies": {
     "hexy": "^0.2.6"
   }
 }
