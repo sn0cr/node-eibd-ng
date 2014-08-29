@@ -1,5 +1,5 @@
 {
-  "name": "node-eibd",
+  "name": "node-eibd-ng",
   "version": "0.0.0",
   "description": "",
   "main": "./highLevel/index.coffee",

@@ -22,8 +22,16 @@
 
 EIBConnection = require '../lowLevel'
 Packet = require "../Packet"
+tools = require "../tools"
 
 module.exports = class KNXConnection
+
+  @encodeAddr: (addr) =>
+    tools.str2addr(addr)
+
+  @decodeAddr: (addr, ga) =>
+    tools.addr2str(addr, ga)
+
   constructor: (@opts) ->
     @eibd = new EIBConnection(opts)
   reset: (cl)=>
@@ -31,7 +39,7 @@ module.exports = class KNXConnection
   end: =>
     @eibd.end()
   write: (dest, value, cl) =>
-    knxData = [0, 0x80 | value]
+    knxData = value
     @eibd.open (err) =>
       if err? and cl?
        cl(err)
