@@ -5,7 +5,7 @@ A rewrite of the node-eibd package with read support (more to come)
 
 ```
   # first install
-  npm install --save https://github.com/sn0cr/node-eibd-ng/archive/v0.0.0.tar.gz
+  npm install --save https://github.com/sn0cr/node-eibd-ng/archive/v0.0.1.tar.gz
 ```
 # Then run :+1:
 
