@@ -1,0 +1,16 @@
+{
+  "name": "node-eibd",
+  "version": "0.0.0",
+  "description": "",
+  "main": "index.coffee",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Sn0cr",
+  "license": "MIT",
+  "dependencies": {
+    "buffertools": "^2.1.2",
+    "coffee-script": "^1.7.1",
+    "hexy": "^0.2.6"
+  }
+}
