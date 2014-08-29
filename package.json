@@ -1,8 +1,8 @@
 {
   "name": "node-eibd-ng",
   "version": "0.0.0",
-  "description": "",
-  "main": "./highLevel/index.coffee",
+  "description": "A rewrite of the node-eibd package with read support (more to come)",
+  "main": "./lib/highLevel/index.coffee",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
