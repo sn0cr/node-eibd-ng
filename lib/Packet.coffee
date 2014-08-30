@@ -27,14 +27,22 @@ module.exports = class Packet
 
   constructor: (@data) ->
     @length = new Buffer(@data.slice(0, 2)).readUInt16BE()
-    @notNeededData = @data.slice(@length)
-    @data = @data.slice(2, @length)
+    @trimDataAndSet(2, @data)
+    @notNeededData = @data.slice(@length, @data.length)
 
 
   append: (newData) =>
     newData = Buffer.concat([@data, newData])
-    @data = newData.slice 0, @length
-    return newData.slice(@length)
+    @trimDataAndSet(0, newData)
+    @notNeededData = @data.slice(@length, newData.length)
+    # return newData.slice(@length)
+
+  trimDataAndSet: (start, data) =>
+    if @length > data.length
+      @data = data.slice(start, data.length)
+    else
+      @data = data.slice(start, @length+2) # due to the length attribute
+      @notNeededData = data.slice()
 
   source: =>
     ((@data[2])<<8)|(@data[3])
@@ -42,14 +50,31 @@ module.exports = class Packet
   sourceString: =>
     Tools.addr2str(@source())
 
+  type: =>
+    payload = @payload()
+    switch payload[1]
+      when 64, 65 then 'Response'
+      when 128, 129 then 'Write'
+      when 0 then 'Read'
+      else 'Unknown'
+
   payload: =>
     buf =  @data.slice(4)
-    {buffer: buf, array: buf.toJSON().data}
+    buf.toJSON().data
+
+  payloadArrray: =>
+   @payload()
+
+  payloadBuffer: =>
+    @data.slice(4)
 
   toPacket: =>
     length = new Buffer(2)
     length.writeUInt16BE(@length)
-    Buffer.concat([length, @data]) if @data.length isnt 0
+    if @data.length isnt 0
+      Buffer.concat([length, @data])
+    else
+      new Buffer(0)
 
   compareTo: (otherBuffer) =>
     if @isReady() is true
@@ -59,3 +84,6 @@ module.exports = class Packet
 
   isReady: =>
     @data.length is @length
+
+  toString: =>
+    "<#Packet @length='#{@data.length}' @source='#{@sourceString()}' @type='#{@type()}' @payloadArray=[#{@payloadArrray().join()}]>"

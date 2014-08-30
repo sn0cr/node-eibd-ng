@@ -25,7 +25,7 @@ Packet = require('../Packet')
 
 net = require('net')
 sys = require('sys')
-Hexy = require 'hexy'
+
 Buffertools = require('buffertools')
 
 module.exports = class EIBConnection
@@ -44,6 +44,8 @@ module.exports = class EIBConnection
     @errorHandler "#{error} EIBConnection##{secError}"
 
   hex: (data, log) =>
+    return unless @debug? and @debug is true
+    Hexy = require 'hexy'
     format =
       format: "twos"
       caps: "upper"

@@ -3,9 +3,10 @@ node-eibd-ng
 
 A rewrite of the node-eibd package with read support (more to come)
 
+# first install
+
 ```
-  # first install
-  npm install --save https://github.com/sn0cr/node-eibd-ng/archive/v0.0.1.tar.gz
+  npm install --save https://github.com/sn0cr/node-eibd-ng/archive/v0.0.2.tar.gz
 ```
 # Then run :+1:
 

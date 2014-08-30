@@ -23,6 +23,7 @@
 EIBConnection = require '../lowLevel'
 Packet = require "../Packet"
 tools = require "../tools"
+Buffertools = require('buffertools')
 
 module.exports = class KNXConnection
 
@@ -38,6 +39,11 @@ module.exports = class KNXConnection
     @eibd.reset(cl)
   end: =>
     @eibd.end()
+  log: (msg) =>
+    @eibd.log(msg)
+  hex: (data, log) =>
+    @eibd.hex(data, log)
+
   write: (dest, value, cl) =>
     knxData = value
     @eibd.open (err) =>
@@ -48,16 +54,14 @@ module.exports = class KNXConnection
           cl(err)
         if data?
           @eibd.sendAPDU knxData, =>
+            cl() if cl?
             @eibd.reset =>
               @eibd.end()
   read: (dest, cl) =>
-    ingoreBuffers = [
-      new Buffer([0x00, 0x06, 0x00, 0x25, 0x00, 0x00, 0x00, 0x00]),
-      new Buffer([0x00, 0x06, 0x00, 0x25, 0xFF, 0xFF, 0x00, 0x00])
-    ]
-    ignorePacket = (buffer) ->
-      for ingoreBuffer in ingoreBuffers
-        return true if buffer.compareTo(ingoreBuffer)
+    @telegrams = []
+    @readingPacket = false
+    @packets = []
+    @currentLength = -1
     @eibd.open (err) =>
      if err? and cl?
        cl(err)
@@ -66,16 +70,36 @@ module.exports = class KNXConnection
           cl(err)
         if data?
           @eibd.sendAPDU [0,0],  =>
-            onData = (data) =>
-              @eibd.log "Got #{@eibd.hex(data)}"
-              if @currentPacket?
-                additionalPacket = @currentPacket.append(data)
-                # handle valid packet
-                @eibd.log "@currentPacket: #{@eibd.hex @currentPacket.toPacket()}"
-                unless ignorePacket(@currentPacket)
-                  @eibd.remove 'data', onData
-                  cl(undefined, @currentPacket) if cl?
-                @currentPacket = new Packet(additionalPacket) unless additionalPacket.length is 0
-              else
-                @currentPacket = new Packet(data)
-            @eibd.socket.on 'data', onData
+            @cl = cl
+            @eibd.socket.on 'data', @onReadData
+
+
+  onReadData: (data) =>
+    @log "#onReadData(data: #{@hex data})"
+
+    # store telgram part
+    @telegrams.push(data)
+    currentTelegram = Buffer.concat @telegrams
+
+    if @readingPacket is false and data.length >= 2
+      @readingPacket = true
+      @currentLength = data.readUInt16BE(0) + 2 # due to the length attribute
+    @log "currentTelegram: #{@hex currentTelegram}"
+
+    if currentTelegram.length >= @currentLength
+      @latestPacket = new Packet(currentTelegram.slice(0, @currentLength))
+      @packets.push(@latestPacket)
+      @log "added packet: #{@latestPacket}"
+      # setting back the things (empty the array...)
+      @telegrams.length = 0
+      @telegrams.push(currentTelegram.slice(@currentLength))
+      @readingPacket = false
+      @currentLength = -1
+
+      if @latestPacket.type() == "Response"
+        @eibd.remove('data', @onReadData)
+        if @cl?
+          @cl(undefined, @latestPacket)
+          delete @cl
+
+
