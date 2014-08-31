@@ -20,16 +20,19 @@ eibd.write dest, [0x00, 0x80 | true], (err) =>
 ```
 or it could be:
 
-# to write :smile:
-KNXConnection = require 'node-eibd-ng'
-eibd = new KNXConnection({ip: '127.0.0.1', port: 6720})
-dest = KNXConnection.encodeAddr("1/2/4")
-eibd.read dest, (err, data) ->
-  console.log err
-  console.log data.toString() if data?
-  eibd.reset => # :exclamation: Don't forget these two lines!
-    eibd.end()  # :exclamation: Don't forget these two lines!
+```coffee-script
+  # to write :smile:
+  KNXConnection = require 'node-eibd-ng'
+  eibd = new KNXConnection({ip: '127.0.0.1', port: 6720})
+  dest = KNXConnection.encodeAddr("1/2/4")
+  eibd.read dest, (err, data) ->
+    console.log err
+    console.log data.toString() if data?
+    eibd.reset => 
+      eibd.end()
 ```
+:exclamation: Don't forget these two last lines!
+
 
 LICENSE
 ============
