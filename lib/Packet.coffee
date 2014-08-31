@@ -83,15 +83,15 @@ module.exports = class Packet
       false
 
   packetDataBuffer: =>
-    @data.slice(2)
+    @data
 
   packetDataArray: =>
-    @data.slice(2).toJSON().data
+    @data.toJSON().data
 
   isReady: =>
     @data.length is @length
 
   toString: =>
     array = "@payloadArray=[#{@payloadArray().join()}]" if @payloadBuffer().length > 0
-    array = "@packetData=[#{@toPacket().toJSON().data.join()}]" if @payloadBuffer().length == 0
+    array = "@packetData=[#{@packetDataArray().join()}]" if @payloadBuffer().length == 0
     "<#Packet @length='#{@data.length}' @source='#{@sourceString()}' @type='#{@type()}' #{array}>"
