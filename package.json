@@ -1,6 +1,6 @@
 {
   "name": "node-eibd-ng",
-  "version": "0.0.2",
+  "version": "0.0.4",
   "description": "A rewrite of the node-eibd package with read support (more to come)",
   "main": "./lib/highLevel/index.coffee",
   "scripts": {

@@ -6,22 +6,22 @@ A rewrite of the node-eibd package with read support (more to come)
 # first install
 
 ```
-  npm install --save https://github.com/sn0cr/node-eibd-ng/archive/v0.0.3.tar.gz
+  npm install --save https://github.com/sn0cr/node-eibd-ng/archive/v0.0.4.tar.gz
 ```
-# Then run 
+# Then run _to write_ :smile:
 
 ```coffee-script
-# to write :smile:
+# to write 
 KNXConnection = require 'node-eibd-ng'
 eibd = new KNXConnection({ip: '127.0.0.1', port: 6720})
 dest = KNXConnection.encodeAddr("1/2/3")
 eibd.write dest, [0x00, 0x80 | true], (err) =>
   console.dir err
 ```
-or it could be:
+# Then run _to read_ :smile:
 
 ```coffee-script
-  # to write :smile:
+  # to read 
   KNXConnection = require 'node-eibd-ng'
   eibd = new KNXConnection({ip: '127.0.0.1', port: 6720})
   dest = KNXConnection.encodeAddr("1/2/4")
@@ -31,7 +31,8 @@ or it could be:
     eibd.reset => 
       eibd.end()
 ```
-:exclamation: Don't forget these two last lines!
+
+## :exclamation: Don't forget these two last lines, or it won't end!
 
 
 LICENSE
