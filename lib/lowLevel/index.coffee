@@ -22,6 +22,7 @@
 
 tools = require('../tools')
 Packet = require('../Packet')
+PacketProcessor = require('./PacketProcessor')
 
 net = require('net')
 sys = require('sys')
@@ -58,10 +59,18 @@ module.exports = class EIBConnection
   end: =>
     @socket.end() if @socket?
     @ended = true
+    delete @socket
 
   remove: (evnt, cl) =>
     @log "#remove(event: #{evnt}, cl)"
-    @socket.removeListener(evnt, cl)
+    @socket.removeListener(evnt, cl) if @socket?
+
+  on: (evnt, cl) =>
+    @log "#on(event: #{evnt}, cl)"
+    if @socket?
+      @socket.on(evnt, cl)
+    else
+      @log "Socket is closed"
 
   log: (msg) =>
     console.log msg if @debug? and @debug is true
@@ -103,27 +112,33 @@ module.exports = class EIBConnection
       0xff
     else
       0x00
+    receivedPackets = []
+    packetProcessor = new PacketProcessor hex: @hex, log: @log
 
     onData = (data) =>
       @log "#openTGroup#onData"
       @hex data, true
-      if @waitForBytes? and @waitForData? and data.length is @waitForBytes
-        data = Buffer.concat([@waitForData, data])
-        delete @waitForBytes
-        delete @waitForData
+      latestPacket = packetProcessor.onData(data)
+      unless (foundPacket = @checkForOpenTGroupPacket(latestPacket))
+        while packetProcessor.hasParts()
+          @log packetProcessor.telegramParts
+          if latestPacket? and @checkForOpenTGroupPacket(latestPacket)
+            foundPacket = true
+            break
+          latestPacket = packetProcessor.onData()
+      if foundPacket is true
+        @remove 'data', onData
+        cl(undefined, latestPacket)
 
-      if data[1] is 2
-        if ((data[2]<<8 | data[3]) == 34)
-          @remove('data', onData)
-          cl(null, data)
-        else
-          @waitForBytes = 2
-          @waitForData = data
-      else
-        @remove('data', onData)
-        cl(new Error('invalid buffer length received'))
+
     @socket.on('data', onData);
     @send(knxData)
+
+  checkForOpenTGroupPacket: (packet) =>
+    @log "#checkForOpenTGroupPacket #{packet}"
+    return false unless packet?
+    packet.length is 2 and packet.data[1] is 0x22
+
 
   # Send an APDU
   sendAPDU: (data, cl) =>
@@ -135,34 +150,30 @@ module.exports = class EIBConnection
     @send knxData, =>
       cl() if cl?
 
-  isResetPacket: (data, onDataClObject, cl) =>
-    if Buffertools.compare(data, new Buffer([0x00, 0x02])) == 0
-      @partData = data
-    if @partData? and Buffertools.compare(data, new Buffer([0x00, 0x04])) is 0
-      data = Buffer.concat([@partData, data])
-    if Buffertools.compare(data, new Buffer([0x00, 0x02, 0x00, 0x04])) is 0
-      @log "#isResetPacket: #{@hex data}"
-      @remove 'data', onDataClObject
-      @log "Resetted successfully (got #{@hex(data)})"
-      cl(data) if cl?
 
   # reset the connection
+  isResetPacket: (data) =>
+    return false unless data?
+    Buffertools.compare(data?.toPacket(), new Buffer([0x00, 0x02, 0x00, 0x04])) is 0
+
   reset: (cl)=>
     @log "Reset"
+    packetProcessor = new PacketProcessor hex: @hex, log: @log
+
     onData = (data) =>
       @log "#reset#onData"
       @hex data, true
-      @isResetPacket(data, onData, cl)
-      if @currentPacket?
-        additionalPacket = @currentPacket.append(data)
-        unless additionalPacket.length is 0
-          @currentPacket = new Packet(additionalPacket)
-      else if data.length isnt 2 or data.length isnt 4
-        @currentPacket = new Packet(data)
-        if @currentPacket.notNeededData.length isnt 0
-          data = @currentPacket.notNeededData
-      @isResetPacket(data, onData, cl)
+      latestPacket = packetProcessor.onData(data)
+      unless (foundPacket = @isResetPacket(latestPacket))
+        while packetProcessor.hasParts()
+          if latestPacket? and @isResetPacket(latestPacket)
+            foundPacket = true
+            break
+          latestPacket = packetProcessor.onData()
+      if foundPacket is true
+        @remove 'data', onData
+        cl(latestPacket)
 
-    @socket.on 'data', onData
+    @on 'data', onData
     @send [0, 4]
 

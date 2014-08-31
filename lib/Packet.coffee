@@ -26,7 +26,7 @@ Tools = require './tools'
 module.exports = class Packet
 
   constructor: (@data) ->
-    @length = new Buffer(@data.slice(0, 2)).readUInt16BE()
+    @length = @data.readUInt16BE(0)
     @trimDataAndSet(2, @data)
     @notNeededData = @data.slice(@length, @data.length)
 
@@ -62,7 +62,7 @@ module.exports = class Packet
     buf =  @data.slice(4)
     buf.toJSON().data
 
-  payloadArrray: =>
+  payloadArray: =>
    @payload()
 
   payloadBuffer: =>
@@ -82,8 +82,16 @@ module.exports = class Packet
     else
       false
 
+  packetDataBuffer: =>
+    @data.slice(2)
+
+  packetDataArray: =>
+    @data.slice(2).toJSON().data
+
   isReady: =>
     @data.length is @length
 
   toString: =>
-    "<#Packet @length='#{@data.length}' @source='#{@sourceString()}' @type='#{@type()}' @payloadArray=[#{@payloadArrray().join()}]>"
+    array = "@payloadArray=[#{@payloadArray().join()}]" if @payloadBuffer().length > 0
+    array = "@packetData=[#{@toPacket().toJSON().data.join()}]" if @payloadBuffer().length == 0
+    "<#Packet @length='#{@data.length}' @source='#{@sourceString()}' @type='#{@type()}' #{array}>"
