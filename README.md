@@ -6,7 +6,7 @@ A rewrite of the node-eibd package with read support (more to come)
 # first install
 
 ```
-  npm install --save https://github.com/sn0cr/node-eibd-ng/archive/v0.0.55555.gz
+  npm install --save https://github.com/sn0cr/node-eibd-ng/archive/v0.0.5.gz
 ```
 # Then run _to write_ :smile:
 
