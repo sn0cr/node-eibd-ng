@@ -34,7 +34,7 @@ module.exports = class KNXConnection
     tools.addr2str(addr, ga)
 
   constructor: (@opts) ->
-    @eibd = new EIBConnection(opts)
+    @eibd = new EIBConnection(@opts)
   reset: (cl)=>
     @eibd.reset(cl)
   end: =>
