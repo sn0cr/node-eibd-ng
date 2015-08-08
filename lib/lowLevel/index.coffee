@@ -150,7 +150,6 @@ module.exports = class EIBConnection
     @send knxData, =>
       cl() if cl?
 
-
   # reset the connection
   isResetPacket: (data) =>
     return false unless data?
@@ -176,4 +175,3 @@ module.exports = class EIBConnection
 
     @on 'data', onData
     @send [0, 4]
-
