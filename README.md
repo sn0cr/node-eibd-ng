@@ -6,7 +6,7 @@ A rewrite of the node-eibd package with read support (more to come)
 # first install
 
 ```
-  npm install --save https://github.com/sn0cr/node-eibd-ng/archive/v0.0.5.gz
+  npm install --save https://github.com/sn0cr/node-eibd-ng/archive/v0.0.6.gz
 ```
 # Then run _to write_ :smile:
 
@@ -40,7 +40,7 @@ LICENSE
 
 The MIT License (MIT)
 
-Copyright (c) 2014 Sn0cr
+Copyright (c) 2014-2015 Sn0cr
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
