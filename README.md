@@ -6,7 +6,7 @@ A client package for the eibd KNX/EIB-server
 # first install
 
 ```
-  npm install --save https://github.com/sn0cr/node-eibd-ng/archive/v0.0.7.gz
+  npm install --save https://github.com/sn0cr/node-eibd-ng/archive/v0.0.7.tar.gz
 ```
 # Then run _to write_
 
