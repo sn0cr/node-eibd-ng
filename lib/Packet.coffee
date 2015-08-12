@@ -51,8 +51,10 @@ module.exports = class Packet
     Tools.addr2str(@source())
 
   type: =>
-    payload = @payload()
-    switch payload[1]
+    @getTypeOfPacket @payload()[1]
+
+  getTypeOfPacket: (payload) ->
+    switch payload
       when 64, 65 then 'Response'
       when 128, 129 then 'Write'
       when 0 then 'Read'

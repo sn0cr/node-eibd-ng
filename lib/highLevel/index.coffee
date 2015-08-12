@@ -23,7 +23,8 @@
 EIBConnection = require '../lowLevel'
 Packet = require "../Packet"
 tools = require "../tools"
-Buffertools = require('buffertools')
+Buffertools = require 'buffertools'
+PacketParser = require "../groupMonitor/PacketParser"
 
 module.exports = class KNXConnection
 
@@ -37,10 +38,13 @@ module.exports = class KNXConnection
     @eibd = new EIBConnection(@opts)
   reset: (cl)=>
     @eibd.reset(cl)
+
   end: =>
     @eibd.end()
+
   log: (msg) =>
     @eibd.log(msg)
+
   hex: (data, log) =>
     @eibd.hex(data, log)
 
@@ -73,7 +77,6 @@ module.exports = class KNXConnection
             @cl = cl
             @eibd.socket.on 'data', @onReadData
 
-
   onReadData: (data) =>
     @log "#onReadData(data: #{@hex data})"
 
@@ -101,5 +104,13 @@ module.exports = class KNXConnection
         if @cl?
           @cl(undefined, @latestPacket)
           delete @cl
+  groupMonitor: (groupMonitorCallback) =>
+    packetParser = new PacketParser {hex: @eibd.hex, log: @eibd.log}, groupMonitorCallback
+    @eibd.open (err) =>
+      return groupMonitorCallback(err, undefined) if err?
+      @eibd.socket.on 'data', (data) =>
+        packetParser.onData data
+      @eibd.send [0x00, 0x26, 0x00, 0x00, 0x00]
+
 
 

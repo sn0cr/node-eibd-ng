@@ -1,14 +1,14 @@
 node-eibd-ng
 ============
 
-A rewrite of the node-eibd package with read support (more to come)
+A client package for the eibd KNX/EIB-server
 
 # first install
 
 ```
-  npm install --save https://github.com/sn0cr/node-eibd-ng/archive/v0.0.6.gz
+  npm install --save https://github.com/sn0cr/node-eibd-ng/archive/v0.0.7.gz
 ```
-# Then run _to write_ :smile:
+# Then run _to write_
 
 ```coffee-script
 # to write 
@@ -18,7 +18,7 @@ dest = KNXConnection.encodeAddr("1/2/3")
 eibd.write dest, [0x00, 0x80 | true], (err) =>
   console.dir err
 ```
-# Then run _to read_ :smile:
+# Then run _to read_
 
 ```coffee-script
   # to read 
@@ -29,10 +29,21 @@ eibd.write dest, [0x00, 0x80 | true], (err) =>
     console.log err
     console.log data.toString() if data?
     eibd.reset => 
-      eibd.end()
+      eibd.end() # <= Terminate the socket connection
 ```
 
-## :exclamation: Don't forget these two last lines, or it won't end!
+# Want to listen on the bus? Here we go:
+
+```coffee-script
+  # to read 
+  KNXConnection = require 'node-eibd-ng'
+  eibd = new KNXConnection({ip: '127.0.0.1', port: 6720})
+  eibd.groupMonitor (err, data) ->
+    console.log data
+
+  setTimeout(eibd.end, 1000*90)
+```
+
 
 
 LICENSE

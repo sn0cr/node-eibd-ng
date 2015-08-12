@@ -20,14 +20,13 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-tools = require('../tools')
-Packet = require('../Packet')
-PacketProcessor = require('./PacketProcessor')
+tools = require '../tools'
+Packet = require '../Packet'
+PacketProcessor = require './PacketProcessor'
 
-net = require('net')
-sys = require('sys')
+net = require 'net'
 
-Buffertools = require('buffertools')
+Buffertools = require 'buffertools'
 
 module.exports = class EIBConnection
   constructor: (@opts) ->
@@ -101,8 +100,11 @@ module.exports = class EIBConnection
     else
       0x00
 
-    @send(data)
-    cl() if cl?
+    @socket.on 'data', (chunk) ->
+      console.log('got %d bytes of data', chunk.length)
+    @socket.write(tools.packBuffer([0x00, 0x05, 0x00, 0x26, 0x00, 0x00, 0x00]))
+    @socket.read(4)
+    cl("fertig") if cl?
 
   # open a connection of type TGroup
   openTGroup: (destination, writeOnly, cl) =>
@@ -112,7 +114,6 @@ module.exports = class EIBConnection
       0xff
     else
       0x00
-    receivedPackets = []
     packetProcessor = new PacketProcessor hex: @hex, log: @log
 
     onData = (data) =>
@@ -130,8 +131,7 @@ module.exports = class EIBConnection
         @remove 'data', onData
         cl(undefined, latestPacket)
 
-
-    @socket.on('data', onData);
+    @socket.on('data', onData)
     @send(knxData)
 
   checkForOpenTGroupPacket: (packet) =>

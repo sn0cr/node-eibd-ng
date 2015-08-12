@@ -33,7 +33,7 @@ module.exports = class PacketProcessor
 
   hasParts: =>
     Buffer.concat(@telegramParts).length isnt 0 and @readingPacket is false
-
+  # This method is called when a new chunk of data arrives
   onData: (data) =>
     @log "PacketProcessor#onData"
     if data
